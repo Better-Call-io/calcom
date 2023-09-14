@@ -10,7 +10,6 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 import type { EventLocationType } from "@calcom/app-store/locations";
-import { createPaymentLink } from "@calcom/app-store/stripepayment/lib/client";
 import dayjs from "@calcom/dayjs";
 import { VerifyCodeDialog } from "@calcom/features/bookings/components/VerifyCodeDialog";
 import {
@@ -181,11 +180,27 @@ export const BookEventFormChild = ({
     ),
   });
   const createBookingMutation = useMutation(createBooking, {
-    onSuccess: (responseData) => {
+    onSuccess: async (responseData) => {
       const { uid, paymentUid } = responseData;
       const fullName = getFullName(bookingForm.getValues("responses.name"));
       if (paymentUid) {
-        return router.push(
+        // Here plug stripe there
+        const response = await fetch("/api/checkout", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            paymentUid,
+            bookingUid: uid,
+          }),
+        });
+        const data = await response.json();
+
+        if (response.status === 200) {
+          return router.push(data.url);
+        }
+        /*return router.push(
           createPaymentLink({
             paymentUid,
             date: timeslot,
@@ -193,7 +208,7 @@ export const BookEventFormChild = ({
             email: bookingForm.getValues("responses.email"),
             absolute: false,
           })
-        );
+        );*/
       }
 
       if (!uid) {
