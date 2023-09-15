@@ -181,8 +181,8 @@ export const BookEventFormChild = ({
   const createBookingMutation = useMutation(createBooking, {
     onSuccess: async (responseData) => {
       const { uid, paymentUid } = responseData;
-      const customerEmail = bookingForm.getValues("responses.email");
-      const bookedUserId = bookingForm.getValues("responses.userId");
+      const customerEmail = responseData.responses.email;
+      const bookedUserId = responseData.userId;
       if (paymentUid) {
         const response = await fetch("/api/checkout", {
           method: "POST",
@@ -200,6 +200,8 @@ export const BookEventFormChild = ({
 
         if (response.status === 200) {
           return router.push(data.url);
+        } else {
+          return;
         }
       }
 
