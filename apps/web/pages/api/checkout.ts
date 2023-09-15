@@ -1,22 +1,12 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 
-import prisma from "@calcom/prisma";
-import stripe from "@calcom/stripepayment/lib/server";
+import stripe from "@calcom/app-store/stripepayment/lib/server";
+import getProduct from "@calcom/stripepayment/lib/getProduct";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "POST") {
     try {
-      const { stripeProductId } = await prisma.groups.findFirstOrThrow({
-        where: {
-          userIds: {
-            has: req.body.bookedUserId,
-          },
-        },
-      });
-      const product: any = await stripe.products.retrieve(stripeProductId, {
-        expand: ["default_price"],
-      });
-      // Create Checkout Sessions from body params.
+      const product = await getProduct(req.body.bookedUserId);
       const session = await stripe.checkout.sessions.create({
         customer_email: req.body.customerEmail,
         line_items: [
