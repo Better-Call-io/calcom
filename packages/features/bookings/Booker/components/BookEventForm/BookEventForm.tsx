@@ -184,7 +184,7 @@ export const BookEventFormChild = ({
       const customerEmail = responseData.responses.email;
       const bookedUserId = responseData.userId;
       if (paymentUid) {
-        const response = await fetch("/api/checkout", {
+        const response = await fetch("/api/better-call/checkout", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

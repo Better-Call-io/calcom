@@ -6,12 +6,12 @@ import getProduct from "@calcom/stripepayment/lib/getProduct";
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "POST") {
     try {
-      const product = await getProduct(req.body.bookedUserId);
+      const { default_price } = await getProduct(req.body.bookedUserId);
       const session = await stripe.checkout.sessions.create({
         customer_email: req.body.customerEmail,
         line_items: [
           {
-            price: product.default_price.id,
+            price: default_price.id,
             quantity: 1,
           },
         ],
