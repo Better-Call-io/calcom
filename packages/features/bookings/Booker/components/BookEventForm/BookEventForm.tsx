@@ -22,7 +22,6 @@ import {
 import getBookingResponsesSchema, {
   getBookingResponsesPartialSchema,
 } from "@calcom/features/bookings/lib/getBookingResponsesSchema";
-import { getFullName } from "@calcom/features/form-builder/utils";
 import { useBookingSuccessRedirect } from "@calcom/lib/bookingSuccessRedirect";
 import { MINUTES_TO_BOOK } from "@calcom/lib/constants";
 import { useLocale } from "@calcom/lib/hooks/useLocale";
@@ -182,9 +181,9 @@ export const BookEventFormChild = ({
   const createBookingMutation = useMutation(createBooking, {
     onSuccess: async (responseData) => {
       const { uid, paymentUid } = responseData;
-      const fullName = getFullName(bookingForm.getValues("responses.name"));
+      const customerEmail = bookingForm.getValues("responses.email");
+      const bookedUserId = bookingForm.getValues("responses.userId");
       if (paymentUid) {
-        // Here plug stripe there
         const response = await fetch("/api/checkout", {
           method: "POST",
           headers: {
@@ -192,6 +191,8 @@ export const BookEventFormChild = ({
           },
           body: JSON.stringify({
             paymentUid,
+            customerEmail,
+            bookedUserId,
             bookingUid: uid,
           }),
         });
@@ -200,15 +201,6 @@ export const BookEventFormChild = ({
         if (response.status === 200) {
           return router.push(data.url);
         }
-        /*return router.push(
-          createPaymentLink({
-            paymentUid,
-            date: timeslot,
-            name: fullName,
-            email: bookingForm.getValues("responses.email"),
-            absolute: false,
-          })
-        );*/
       }
 
       if (!uid) {
