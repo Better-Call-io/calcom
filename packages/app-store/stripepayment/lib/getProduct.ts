@@ -1,7 +1,7 @@
 import stripe from "@calcom/app-store/stripepayment/lib/server";
 import prisma from "@calcom/prisma";
 
-export default async function getProduct(userId: number) {
+export default async function getProduct(userId: number): stripe.Stripe.Product {
   const { stripeProductId } = await prisma.groups.findFirstOrThrow({
     where: {
       userIds: {

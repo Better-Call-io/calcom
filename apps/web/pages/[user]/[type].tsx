@@ -4,17 +4,17 @@ import { z } from "zod";
 import { Booker } from "@calcom/atoms";
 import { getBookerWrapperClasses } from "@calcom/features/bookings/Booker/utils/getBookerWrapperClasses";
 import { BookerSeo } from "@calcom/features/bookings/components/BookerSeo";
+import type { GetBookingType } from "@calcom/features/bookings/lib/get-booking";
 import {
   getBookingForReschedule,
   getBookingForSeatedEvent,
   getMultipleDurationValue,
 } from "@calcom/features/bookings/lib/get-booking";
-import type { GetBookingType } from "@calcom/features/bookings/lib/get-booking";
-import { getSlugOrRequestedSlug } from "@calcom/features/ee/organizations/lib/orgDomains";
-import { orgDomainConfig } from "@calcom/features/ee/organizations/lib/orgDomains";
+import { getSlugOrRequestedSlug, orgDomainConfig } from "@calcom/features/ee/organizations/lib/orgDomains";
 import { getUsernameList } from "@calcom/lib/defaultEvents";
 import slugify from "@calcom/lib/slugify";
 import prisma from "@calcom/prisma";
+import getProduct from "@calcom/stripepayment/lib/getProduct";
 
 import type { inferSSRProps } from "@lib/types/inferSSRProps";
 import type { EmbedProps } from "@lib/withEmbedSsr";
@@ -26,6 +26,7 @@ export type PageProps = inferSSRProps<typeof getServerSideProps> & EmbedProps;
 export default function Type({
   slug,
   user,
+  product,
   isEmbed,
   booking,
   away,
@@ -53,6 +54,7 @@ export default function Type({
         hideBranding={isBrandingHidden}
         entity={entity}
         duration={duration}
+        product={product}
       />
     </main>
   );
@@ -126,6 +128,7 @@ async function getDynamicGroupPageProps(context: GetServerSidePropsContext) {
       ),
       booking,
       user: usernames.join("+"),
+      product: null,
       slug,
       away: false,
       trpcState: ssr.dehydrate(),
@@ -158,6 +161,7 @@ async function getUserPageProps(context: GetServerSidePropsContext) {
       away: true,
       hideBranding: true,
       allowSEOIndexing: true,
+      id: true,
     },
   });
 
@@ -166,6 +170,8 @@ async function getUserPageProps(context: GetServerSidePropsContext) {
       notFound: true,
     };
   }
+
+  const product = await getProduct(user.id);
 
   let booking: GetBookingType | null = null;
   if (rescheduleUid) {
@@ -189,6 +195,7 @@ async function getUserPageProps(context: GetServerSidePropsContext) {
     };
   }
 
+  const { unit_amount, currency } = product.default_price;
   return {
     props: {
       booking,
@@ -199,6 +206,7 @@ async function getUserPageProps(context: GetServerSidePropsContext) {
       ),
       away: user?.away,
       user: username,
+      product: { price: unit_amount, currency },
       slug,
       entity: eventData.entity,
       trpcState: ssr.dehydrate(),
