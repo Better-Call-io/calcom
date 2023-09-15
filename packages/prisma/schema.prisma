@@ -923,3 +923,9 @@ view BookingTimeStatus {
   timeStatus    String?
   eventParentId Int?
 }
+
+model Groups {
+  id              Int    @id @default(autoincrement())
+  stripeProductId String
+  userIds         Int[]
+}
