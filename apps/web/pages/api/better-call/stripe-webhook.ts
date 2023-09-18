@@ -10,13 +10,22 @@ import { HttpError as HttpCode } from "@calcom/lib/http-error";
 import { getTranslation } from "@calcom/lib/server";
 import { getTimeFormatStringFromUserTimeFormat } from "@calcom/lib/timeFormat";
 import { BookingStatus } from "@calcom/prisma/enums";
+import stripe from "@calcom/stripepayment/lib/server";
 import type { CalendarEvent } from "@calcom/types/Calendar";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== "POST") {
     throw new HttpCode({ statusCode: 405, message: "Not Allowed" });
   }
-  const event = req.body;
+  const sig = req.headers["stripe-signature"];
+  if (!sig) {
+    throw new HttpCode({ statusCode: 400, message: "Missing stripe-signature" });
+  }
+  if (!process.env.STRIPE_WEBHOOK_SECRET) {
+    throw new HttpCode({ statusCode: 500, message: "Missing process.env.STRIPE_WEBHOOK_SECRET" });
+  }
+  const event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
+
   if (event.type == "payment_intent.succeeded") {
     const paymentIntent = event.data.object as Stripe.PaymentIntent;
     const payment = await prisma.payment.findFirst({
