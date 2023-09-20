@@ -13,10 +13,6 @@ const interFont = fetch(new URL("../../../../public/fonts/Inter-Regular.ttf", im
   res.arrayBuffer()
 );
 
-const interFontMedium = fetch(new URL("../../../../public/fonts/Inter-Medium.ttf", import.meta.url)).then(
-  (res) => res.arrayBuffer()
-);
-
 export const config = {
   runtime: "edge",
 };
@@ -47,17 +43,12 @@ export default async function handler(req: NextApiRequest) {
   const { searchParams } = new URL(`${req.url}`);
   const imageType = searchParams.get("type");
 
-  const [calFontData, interFontData, interFontMediumData] = await Promise.all([
-    calFont,
-    interFont,
-    interFontMedium,
-  ]);
+  const [calFontData, interFontData] = await Promise.all([calFont, interFont]);
   const ogConfig = {
     width: 1200,
     height: 630,
     fonts: [
       { name: "inter", data: interFontData, weight: 400 },
-      { name: "inter", data: interFontMediumData, weight: 500 },
       { name: "cal", data: calFontData, weight: 400 },
       { name: "cal", data: calFontData, weight: 600 },
     ] as SatoriOptions["fonts"],
