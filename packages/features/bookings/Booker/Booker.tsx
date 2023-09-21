@@ -44,6 +44,7 @@ const BookerComponent = ({
   isTeamEvent,
   entity,
   duration,
+  product,
 }: BookerProps) => {
   /**
    * Prioritize dateSchedule load
@@ -261,7 +262,7 @@ const BookerComponent = ({
               <BookerSection
                 area="meta"
                 className="max-w-screen flex w-full flex-col md:w-[var(--booker-meta-width)]">
-                <EventMeta />
+                <EventMeta product={product} />
                 {layout !== BookerLayouts.MONTH_VIEW &&
                   !(layout === "mobile" && bookerState === "booking") && (
                     <div className="mt-auto px-5 py-3 ">
@@ -354,7 +355,6 @@ const BookerComponent = ({
 
 export const Booker = (props: BookerProps) => {
   if (props.isAway) return <Away />;
-
   return (
     <LazyMotion strict features={loadFramerFeatures}>
       <BookerComponent {...props} />

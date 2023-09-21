@@ -19,7 +19,7 @@ const TimezoneSelect = dynamic(() => import("@calcom/ui").then((mod) => mod.Time
   ssr: false,
 });
 
-export const EventMeta = () => {
+export const EventMeta = ({ product }) => {
   const { timezone, setTimezone, timeFormat } = useTimePreferences();
   const selectedDuration = useBookerStore((state) => state.selectedDuration);
   const selectedTimeslot = useBookerStore((state) => state.selectedTimeslot);
@@ -103,7 +103,7 @@ export const EventMeta = () => {
                 />
               </EventMetaBlock>
             )}
-            <EventDetails event={event} />
+            <EventDetails event={event} product={product} />
             <EventMetaBlock
               className="cursor-pointer [&_.current-timezone:before]:focus-within:opacity-100 [&_.current-timezone:before]:hover:opacity-100"
               contentClassName="relative max-w-[90%]"

@@ -10,7 +10,6 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 import type { EventLocationType } from "@calcom/app-store/locations";
-import { createPaymentLink } from "@calcom/app-store/stripepayment/lib/client";
 import dayjs from "@calcom/dayjs";
 import { VerifyCodeDialog } from "@calcom/features/bookings/components/VerifyCodeDialog";
 import {
@@ -23,7 +22,6 @@ import {
 import getBookingResponsesSchema, {
   getBookingResponsesPartialSchema,
 } from "@calcom/features/bookings/lib/getBookingResponsesSchema";
-import { getFullName } from "@calcom/features/form-builder/utils";
 import { useBookingSuccessRedirect } from "@calcom/lib/bookingSuccessRedirect";
 import { MINUTES_TO_BOOK } from "@calcom/lib/constants";
 import { useLocale } from "@calcom/lib/hooks/useLocale";
@@ -181,40 +179,31 @@ export const BookEventFormChild = ({
     ),
   });
   const createBookingMutation = useMutation(createBooking, {
-    onSuccess: (responseData) => {
-      const { uid, paymentUid } = responseData;
-      const fullName = getFullName(bookingForm.getValues("responses.name"));
-      if (paymentUid) {
-        return router.push(
-          createPaymentLink({
-            paymentUid,
-            date: timeslot,
-            name: fullName,
-            email: bookingForm.getValues("responses.email"),
-            absolute: false,
-          })
-        );
-      }
-
+    onSuccess: async (responseData) => {
+      const { uid } = responseData;
       if (!uid) {
         console.error("No uid returned from createBookingMutation");
         return;
       }
-
-      const query = {
-        isSuccessBookingPage: true,
-        email: bookingForm.getValues("responses.email"),
-        eventTypeSlug: eventSlug,
-        seatReferenceUid: "seatReferenceUid" in responseData ? responseData.seatReferenceUid : null,
-        formerTime:
-          isRescheduling && bookingData?.startTime ? dayjs(bookingData.startTime).toString() : undefined,
-      };
-
-      return bookingSuccessRedirect({
-        successRedirectUrl: eventType?.successRedirectUrl || "",
-        query,
-        booking: responseData,
+      const response = await fetch("/api/better-call/checkout", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          customerEmail: responseData.responses.email,
+          bookedUserId: responseData.userId,
+          bookingUid: uid,
+          cancelUrl: window.location.href,
+        }),
       });
+      if (response.status === 200) {
+        const data = await response.json();
+        return router.push(data.url);
+      } else {
+        console.error("Error while checkout");
+        return;
+      }
     },
     onError: () => {
       errorRef && errorRef.current?.scrollIntoView({ behavior: "smooth" });

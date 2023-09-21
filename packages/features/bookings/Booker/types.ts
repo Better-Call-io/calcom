@@ -2,9 +2,15 @@ import type { BookerLayouts } from "@calcom/prisma/zod-utils";
 
 import type { GetBookingType } from "../lib/get-booking";
 
+export interface BetterCallProduct {
+  price: number;
+  currency: string;
+}
+
 export interface BookerProps {
   eventSlug: string;
   username: string;
+  product?: BetterCallProduct;
 
   /**
    * Whether is a team or org, we gather basic info from both
