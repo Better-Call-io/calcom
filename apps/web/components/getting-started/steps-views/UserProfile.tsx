@@ -79,20 +79,10 @@ const UserProfile = () => {
 
   const DEFAULT_EVENT_TYPES = [
     {
-      title: t("15min_meeting"),
-      slug: "15min",
-      length: 15,
-    },
-    {
-      title: t("30min_meeting"),
-      slug: "30min",
+      title: "Better call",
+      slug: "better-call",
       length: 30,
-    },
-    {
-      title: t("secret_meeting"),
-      slug: "secret",
-      length: 15,
-      hidden: true,
+      description: "Politique de remboursement : TO FILL",
     },
   ];
 
