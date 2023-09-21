@@ -926,11 +926,12 @@ view BookingTimeStatus {
 }
 
 model Groups {
-  id              Int    @id @default(autoincrement())
+  id              Int     @id @default(autoincrement())
   stripeProductId String
   userIds         Int[]
+  isBaseGroup     Boolean @default(false)
 }
- 
+
 model CalendarCache {
   // The key would be the unique URL that is requested by the user
   key          String
