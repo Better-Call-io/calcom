@@ -379,7 +379,7 @@ async function ensureAvailableUsers(
   }
 ) {
   const availableUsers: IsFixedAwareUser[] = [];
-  const duration = dayjs(input.dateTo).diff(input.dateFrom, 'minute');
+  const duration = dayjs(input.dateTo).diff(input.dateFrom, "minute");
 
   const originalBookingDuration = input.originalRescheduledBooking
     ? dayjs(input.originalRescheduledBooking.endTime).diff(
@@ -2251,11 +2251,7 @@ async function handler(
     }
   }
 
-  const bookingRequiresPayment =
-    !Number.isNaN(paymentAppData.price) &&
-    paymentAppData.price > 0 &&
-    !originalRescheduledBooking?.paid &&
-    !!booking;
+  const bookingRequiresPayment = true;
 
   if (!isConfirmedByDefault && noEmail !== true && !bookingRequiresPayment) {
     await sendOrganizerRequestEmail({ ...evt, additionalNotes });
