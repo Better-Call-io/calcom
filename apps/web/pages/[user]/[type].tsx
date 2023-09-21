@@ -63,84 +63,6 @@ export default function Type({
 Type.isBookingPage = true;
 Type.PageWrapper = PageWrapper;
 
-async function getDynamicGroupPageProps(context: GetServerSidePropsContext) {
-  const { user: usernames, type: slug } = paramsSchema.parse(context.params);
-  const { rescheduleUid, bookingUid, duration: queryDuration } = context.query;
-
-  const { ssrInit } = await import("@server/lib/ssr");
-  const ssr = await ssrInit(context);
-  const { currentOrgDomain, isValidOrgDomain } = orgDomainConfig(
-    context.req.headers.host ?? "",
-    context.params?.orgSlug
-  );
-
-  const users = await prisma.user.findMany({
-    where: {
-      username: {
-        in: usernames,
-      },
-      organization: isValidOrgDomain
-        ? {
-            slug: currentOrgDomain,
-          }
-        : null,
-    },
-    select: {
-      allowDynamicBooking: true,
-    },
-  });
-
-  if (!users.length) {
-    return {
-      notFound: true,
-    };
-  }
-  const org = isValidOrgDomain ? currentOrgDomain : null;
-
-  let booking: GetBookingType | null = null;
-  if (rescheduleUid) {
-    booking = await getBookingForReschedule(`${rescheduleUid}`);
-  } else if (bookingUid) {
-    booking = await getBookingForSeatedEvent(`${bookingUid}`);
-  }
-
-  // We use this to both prefetch the query on the server,
-  // as well as to check if the event exist, so we c an show a 404 otherwise.
-  const eventData = await ssr.viewer.public.event.fetch({
-    username: usernames.join("+"),
-    eventSlug: slug,
-    org,
-  });
-
-  if (!eventData) {
-    return {
-      notFound: true,
-    };
-  }
-
-  return {
-    props: {
-      entity: eventData.entity,
-      duration: getMultipleDurationValue(
-        eventData.metadata?.multipleDuration,
-        queryDuration,
-        eventData.length
-      ),
-      booking,
-      user: usernames.join("+"),
-      product: null,
-      slug,
-      away: false,
-      trpcState: ssr.dehydrate(),
-      isBrandingHidden: false,
-      isSEOIndexable: true,
-      themeBasis: null,
-      bookingUid: bookingUid ? `${bookingUid}` : null,
-      rescheduleUid: rescheduleUid ? `${rescheduleUid}` : null,
-    },
-  };
-}
-
 async function getUserPageProps(context: GetServerSidePropsContext) {
   const { user: usernames, type: slug } = paramsSchema.parse(context.params);
   const username = usernames[0];
@@ -227,8 +149,5 @@ const paramsSchema = z.object({
 // Booker page fetches a tiny bit of data server side, to determine early
 // whether the page should show an away state or dynamic booking not allowed.
 export const getServerSideProps = async (context: GetServerSidePropsContext) => {
-  const { user } = paramsSchema.parse(context.params);
-  const isDynamicGroup = user.length > 1;
-
-  return isDynamicGroup ? await getDynamicGroupPageProps(context) : await getUserPageProps(context);
+  return await getUserPageProps(context);
 };
