@@ -194,6 +194,7 @@ export const BookEventFormChild = ({
             customerEmail,
             bookedUserId,
             bookingUid: uid,
+            cancelUrl: window.location.href,
           }),
         });
         const data = await response.json();

@@ -19,7 +19,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         ],
         mode: "payment",
         success_url: `${req.headers.origin}/booking/${req.body.bookingUid}`,
-        cancel_url: `${req.headers.origin}`,
+        cancel_url: req.body.cancelUrl || req.headers.origin,
       });
       res.status(200).json({ url: session.url });
     } catch (err: any) {
