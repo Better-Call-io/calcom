@@ -180,51 +180,30 @@ export const BookEventFormChild = ({
   });
   const createBookingMutation = useMutation(createBooking, {
     onSuccess: async (responseData) => {
-      const { uid, paymentUid } = responseData;
-      const customerEmail = responseData.responses.email;
-      const bookedUserId = responseData.userId;
-      if (paymentUid) {
-        const response = await fetch("/api/better-call/checkout", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            paymentUid,
-            customerEmail,
-            bookedUserId,
-            bookingUid: uid,
-            cancelUrl: window.location.href,
-          }),
-        });
-        const data = await response.json();
-
-        if (response.status === 200) {
-          return router.push(data.url);
-        } else {
-          return;
-        }
-      }
-
+      const { uid } = responseData;
       if (!uid) {
         console.error("No uid returned from createBookingMutation");
         return;
       }
-
-      const query = {
-        isSuccessBookingPage: true,
-        email: bookingForm.getValues("responses.email"),
-        eventTypeSlug: eventSlug,
-        seatReferenceUid: "seatReferenceUid" in responseData ? responseData.seatReferenceUid : null,
-        formerTime:
-          isRescheduling && bookingData?.startTime ? dayjs(bookingData.startTime).toString() : undefined,
-      };
-
-      return bookingSuccessRedirect({
-        successRedirectUrl: eventType?.successRedirectUrl || "",
-        query,
-        booking: responseData,
+      const response = await fetch("/api/better-call/checkout", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          customerEmail: responseData.responses.email,
+          bookedUserId: responseData.userId,
+          bookingUid: uid,
+          cancelUrl: window.location.href,
+        }),
       });
+      if (response.status === 200) {
+        const data = await response.json();
+        return router.push(data.url);
+      } else {
+        console.error("Error while checkout");
+        return;
+      }
     },
     onError: () => {
       errorRef && errorRef.current?.scrollIntoView({ behavior: "smooth" });
