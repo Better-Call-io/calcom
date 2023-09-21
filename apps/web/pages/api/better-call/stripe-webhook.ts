@@ -88,7 +88,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     });
 
     const attendeesList = await Promise.all(attendeesListPromises);
-    console.log(attendeesList);
     const selectedDestinationCalendar = booking.destinationCalendar || booking.user.destinationCalendar;
     const t = await getTranslation(booking.user.locale ?? "en", "common");
     const evt: CalendarEvent = {
