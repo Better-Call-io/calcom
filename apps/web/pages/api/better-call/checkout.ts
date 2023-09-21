@@ -6,6 +6,7 @@ import getProduct from "@calcom/stripepayment/lib/getProduct";
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "POST") {
     try {
+      const bookingUid = req.body.bookingUid;
       const {
         default_price: { id },
       } = await getProduct(req.body.bookedUserId);
@@ -18,7 +19,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           },
         ],
         mode: "payment",
-        success_url: `${req.headers.origin}/booking/${req.body.bookingUid}`,
+        metadata: { bookingUid },
+        success_url: `${req.headers.origin}/booking/${bookingUid}`,
         cancel_url: req.body.cancelUrl || req.headers.origin,
       });
       res.status(200).json({ url: session.url });
