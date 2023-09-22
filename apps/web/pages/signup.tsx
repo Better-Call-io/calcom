@@ -131,7 +131,7 @@ export default function Signup({ prepopulateFormValues, token, orgSlug, orgAutoA
             {t("create_your_account")}
           </h2>
         </div>
-        <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+        <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-2xl">
           <div className="bg-default mx-2 p-6 shadow sm:rounded-lg lg:p-8">
             <FormProvider {...methods}>
               <form
