@@ -1,4 +1,4 @@
-import type { App, Attendee, DestinationCalendar, EventTypeCustomInput } from "@prisma/client";
+import type { Attendee, DestinationCalendar, EventTypeCustomInput } from "@prisma/client";
 import { Prisma } from "@prisma/client";
 import async from "async";
 import { isValidPhoneNumber } from "libphonenumber-js";
@@ -12,7 +12,6 @@ import z from "zod";
 import { getCalendar } from "@calcom/app-store/_utils/getCalendar";
 import type { LocationObject } from "@calcom/app-store/locations";
 import { getLocationValueForDB, OrganizerDefaultConferencingAppType } from "@calcom/app-store/locations";
-import type { EventTypeAppsList } from "@calcom/app-store/utils";
 import { getAppFromSlug } from "@calcom/app-store/utils";
 import EventManager from "@calcom/core/EventManager";
 import { getEventName } from "@calcom/core/event";
@@ -68,15 +67,6 @@ const log = logger.getChildLogger({ prefix: ["[api] book:user"] });
 type User = Prisma.UserGetPayload<typeof userSelect>;
 type BufferedBusyTimes = BufferedBusyTime[];
 type BookingType = Prisma.PromiseReturnType<typeof getOriginalRescheduledBooking>;
-
-interface IEventTypePaymentCredentialType {
-  appId: EventTypeAppsList;
-  app: {
-    categories: App["categories"];
-    dirName: string;
-  };
-  key: Prisma.JsonValue;
-}
 
 /**
  * Refreshes a Credential with fresh data from the database.

@@ -3,8 +3,8 @@ import { buffer } from "micro";
 import type { NextApiRequest, NextApiResponse } from "next";
 
 import EventManager from "@calcom/core/EventManager";
+import { sendScheduledEmails } from "@calcom/emails";
 import { getCalEventResponses } from "@calcom/features/bookings/lib/getCalEventResponses";
-import { handleConfirmation } from "@calcom/features/bookings/lib/handleConfirmation";
 import { isPrismaObjOrUndefined } from "@calcom/lib";
 import { IS_PRODUCTION } from "@calcom/lib/constants";
 import { getErrorFromUnknown } from "@calcom/lib/errors";
@@ -141,14 +141,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         data: bookingData,
       });
       await prisma.$transaction([bookingUpdate]);
-      await handleConfirmation({
-        user: booking.user,
-        evt,
-        prisma,
-        bookingId: booking.id,
-        booking,
-        paid: true,
-      });
+      await sendScheduledEmails({ ...evt });
     }
     res.json({ received: true });
   } catch (_err) {
