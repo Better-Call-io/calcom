@@ -1194,7 +1194,7 @@ async function handler(
     // Otherwise, an owner rescheduling should be always accepted.
     // Before comparing make sure that userId is set, otherwise undefined === undefined
     const userReschedulingIsOwner = userId && originalRescheduledBooking?.user?.id === userId;
-    const isConfirmedByDefault = (!requiresConfirmation && !paymentAppData.price) || userReschedulingIsOwner;
+    const isConfirmedByDefault = false;
 
     const attendeesData = evt.attendees.map((attendee) => {
       //if attendee is team member, it should fetch their locale not booker's locale
