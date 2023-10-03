@@ -6,9 +6,11 @@ import type { CSSProperties } from "react";
 import { Suspense } from "react";
 import { z } from "zod";
 
+import { getServerSession } from "@calcom/feature-auth/lib/getServerSession";
 import { APP_NAME } from "@calcom/lib/constants";
 import { useLocale } from "@calcom/lib/hooks/useLocale";
 import { useParamsWithFallback } from "@calcom/lib/hooks/useParamsWithFallback";
+import { trpc } from "@calcom/trpc";
 import { Button, StepCard, Steps } from "@calcom/ui";
 import { Loader } from "@calcom/ui/components/icon";
 
@@ -38,6 +40,7 @@ const ExpertSetupPage = () => {
   const params = useParamsWithFallback();
   const pathname = usePathname();
   const router = useRouter();
+  const [user] = trpc.viewer.me.useSuspenseQuery();
   const { t } = useLocale();
   const result = stepRouteSchema.safeParse(params);
   const currentStep = result.success ? result.data.step[0] : INITIAL_STEP;
@@ -101,12 +104,12 @@ const ExpertSetupPage = () => {
             </div>
             <StepCard>
               <Suspense fallback={<Loader />}>
-                {currentStep === "connected-calendar" && <ConnectedCalendars nextStep={() => goToIndex(2)} />}
+                {currentStep === "connected-calendar" && <ConnectedCalendars nextStep={() => goToIndex(1)} />}
 
                 {currentStep === "setup-availability" && (
                   <SetupAvailability
-                    nextStep={() => goToIndex(4)}
-                    //defaultScheduleId={user.defaultScheduleId}
+                    nextStep={() => goToIndex(2)}
+                    defaultScheduleId={user.defaultScheduleId}
                     isFinalStep={true}
                   />
                 )}
@@ -135,9 +138,28 @@ const ExpertSetupPage = () => {
 };
 
 export const getServerSideProps = async (context: GetServerSidePropsContext) => {
+  const { req, res } = context;
+
+  const session = await getServerSession({ req, res });
+
+  if (!session?.user?.id) {
+    return { redirect: { permanent: false, destination: "/auth/login?callbackUrl=/expert-setup" } };
+  }
+
   const ssr = await ssrInit(context);
 
   await ssr.viewer.me.prefetch();
+
+  const user = await prisma.user.findUnique({
+    where: {
+      id: session.user.id,
+    },
+  });
+
+  if (!user) {
+    throw new Error("User from session not found");
+  }
+
   return {
     props: {
       ...(await serverSideTranslations(context.locale ?? "", ["common"])),

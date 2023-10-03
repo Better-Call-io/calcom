@@ -1,4 +1,5 @@
 import { useRouter } from "next/navigation";
+import { useMemo, useEffect } from "react";
 import { useForm } from "react-hook-form";
 
 import { Schedule } from "@calcom/features/schedules";
@@ -30,12 +31,15 @@ const SetupAvailability = (props: ISetupAvailabilityProps) => {
       enabled: !!scheduleId,
     }
   );
-
   const availabilityForm = useForm({
-    defaultValues: {
-      schedule: queryAvailability?.data?.availability || DEFAULT_SCHEDULE,
-    },
+    defaultValues: useMemo(() => {
+      return { schedule: queryAvailability?.data?.availability || DEFAULT_SCHEDULE };
+    }, [queryAvailability]),
   });
+
+  useEffect(() => {
+    availabilityForm.reset({ schedule: queryAvailability?.data?.availability || DEFAULT_SCHEDULE });
+  }, [queryAvailability?.data?.availability]);
 
   const mutationOptions = {
     onError: (error: TRPCClientErrorLike<AppRouter>) => {
