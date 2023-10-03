@@ -89,9 +89,6 @@ export function AvailabilityList({ schedules }: RouterOutputs["viewer"]["availab
   // Adds smooth delete button - item fades and old item slides into place
 
   const [animationParentRef] = useAutoAnimate<HTMLUListElement>();
-  const getExpertSetupUrl = () => {
-    return `${process.env.NEXT_PUBLIC_WEBAPP_URL}/auth/login?hashLogin=${meQuery.data?.loginHash}&callbackUrl=expert-setup`;
-  };
 
   return (
     <>
@@ -125,7 +122,6 @@ export function AvailabilityList({ schedules }: RouterOutputs["viewer"]["availab
           </ul>
         </div>
       )}
-      <div>{getExpertSetupUrl()}</div>
     </>
   );
 }

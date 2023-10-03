@@ -944,6 +944,7 @@ const EventTypesPage = () => {
   const { open } = useIntercom();
   const { data: user } = useMeQuery();
   const [showProfileBanner, setShowProfileBanner] = useState(false);
+  const [setupUrl, setSetupUrl] = useState();
   const orgBranding = useOrgBranding();
   const routerQuery = useRouterQuery();
   const filters = getTeamsFiltersFromQuery(routerQuery);
@@ -969,6 +970,12 @@ const EventTypesPage = () => {
   }, []);
 
   useEffect(() => {
+    setSetupUrl(
+      `${process.env.NEXT_PUBLIC_WEBAPP_URL}/auth/login?hashLogin=${user?.loginHash}&callbackUrl=expert-setup`
+    );
+  }, [user]);
+
+  useEffect(() => {
     setShowProfileBanner(
       !!orgBranding && !document.cookie.includes("calcom-profile-banner=1") && !user?.completedOnboarding
     );
@@ -988,6 +995,7 @@ const EventTypesPage = () => {
         description="Create events to share for people to book on your calendar."
       />
       <Main data={data} status={status} errorMessage={error?.message} filters={filters} />
+      <div>{setupUrl}</div>
     </ShellMain>
   );
 };
