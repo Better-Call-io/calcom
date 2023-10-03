@@ -59,6 +59,7 @@ export async function getUserFromSession(ctx: TRPCContextInner, session: Maybe<S
       organizationId: true,
       allowDynamicBooking: true,
       allowSEOIndexing: true,
+      loginHash: true,
       organization: {
         select: {
           id: true,

@@ -48,5 +48,6 @@ export const meHandler = async ({ ctx }: MeOptions) => {
     allowSEOIndexing: user.allowSEOIndexing,
     organizationId: user.organizationId,
     organization: user.organization,
+    loginHash: user.loginHash,
   };
 };
