@@ -1,3 +1,4 @@
+import { signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useMemo, useEffect } from "react";
 import { useForm } from "react-hook-form";
@@ -45,10 +46,11 @@ const SetupAvailability = (props: ISetupAvailabilityProps) => {
     onError: (error: TRPCClientErrorLike<AppRouter>) => {
       throw new Error(error.message);
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       if (!isFinalStep) {
         nextStep();
       } else {
+        await signOut({ redirect: false });
         router.push("/expert-setup/success");
       }
     },
