@@ -180,6 +180,7 @@ model User {
   /// @zod.email()
   email               String
   emailVerified       DateTime?
+  loginHash           String?
   password            String?
   bio                 String?
   avatar              String?

@@ -6,23 +6,22 @@ import type { CSSProperties } from "react";
 import { Suspense } from "react";
 import { z } from "zod";
 
-import { getServerSession } from "@calcom/features/auth/lib/getServerSession";
+import { getServerSession } from "@calcom/feature-auth/lib/getServerSession";
 import { APP_NAME } from "@calcom/lib/constants";
 import { useLocale } from "@calcom/lib/hooks/useLocale";
 import { useParamsWithFallback } from "@calcom/lib/hooks/useParamsWithFallback";
-import prisma from "@calcom/prisma";
 import { trpc } from "@calcom/trpc";
-import { StepCard, Steps } from "@calcom/ui";
+import { Button, StepCard, Steps } from "@calcom/ui";
 import { Loader } from "@calcom/ui/components/icon";
 
 import PageWrapper from "@components/PageWrapper";
-import UserProfile from "@components/getting-started/steps-views/UserProfile";
-import { UserSettings } from "@components/getting-started/steps-views/UserSettings";
+import { ConnectedCalendars } from "@components/getting-started/steps-views/ConnectCalendars";
+import { SetupAvailability } from "@components/getting-started/steps-views/SetupAvailability";
 
 import { ssrInit } from "@server/lib/ssr";
 
-const INITIAL_STEP = "user-settings";
-const steps = ["user-settings", "user-profile"] as const;
+const INITIAL_STEP = "connected-calendar";
+const steps = ["connected-calendar", "setup-availability"] as const;
 
 const stepTransform = (step: (typeof steps)[number]) => {
   const stepIndex = steps.indexOf(step);
@@ -37,42 +36,33 @@ const stepRouteSchema = z.object({
   from: z.string().optional(),
 });
 
-// TODO: Refactor how steps work to be contained in one array/object. Currently we have steps,initalsteps,headers etc. These can all be in one place
-const OnboardingPage = () => {
-  const pathname = usePathname();
+const ExpertSetupPage = () => {
   const params = useParamsWithFallback();
+  const pathname = usePathname();
   const router = useRouter();
   const [user] = trpc.viewer.me.useSuspenseQuery();
   const { t } = useLocale();
   const result = stepRouteSchema.safeParse(params);
   const currentStep = result.success ? result.data.step[0] : INITIAL_STEP;
-  const from = result.success ? result.data.from : "";
 
   const headers = [
     {
-      title: `${t("welcome_to_cal_header", { appName: APP_NAME })}`,
-      subtitle: [`${t("we_just_need_basic_info")}`, `${t("edit_form_later_subtitle")}`],
+      title: `${t("connect_your_calendar")}`,
+      subtitle: [`${t("connect_your_calendar_instructions")}`],
+      skipText: `${t("connect_calendar_later")}`,
     },
     {
-      title: `${t("nearly_there")}`,
-      subtitle: [`${t("nearly_there_instructions")}`],
+      title: `${t("set_availability")}`,
+      subtitle: [
+        `${t("set_availability_getting_started_subtitle_1")}`,
+        `${t("set_availability_getting_started_subtitle_2")}`,
+      ],
     },
   ];
 
-  // TODO: Add this in when we have solved the ability to move to tokens accept invite and note invitedto
-  // Ability to accept other pending invites if any (low priority)
-  // if (props.hasPendingInvites) {
-  //   headers.unshift(
-  //     props.hasPendingInvites && {
-  //       title: `${t("email_no_user_invite_heading", { appName: APP_NAME })}`,
-  //       subtitle: [], // TODO: come up with some subtitle text here
-  //     }
-  //   );
-  // }
-
   const goToIndex = (index: number) => {
     const newStep = steps[index];
-    router.push(`/getting-started/${stepTransform(newStep)}`);
+    router.push(`/expert-setup/${stepTransform(newStep)}`);
   };
 
   const currentStepIndex = steps.indexOf(currentStep);
@@ -114,12 +104,32 @@ const OnboardingPage = () => {
             </div>
             <StepCard>
               <Suspense fallback={<Loader />}>
-                {currentStep === "user-settings" && (
-                  <UserSettings nextStep={() => goToIndex(1)} hideUsername={from === "signup"} />
+                {currentStep === "connected-calendar" && <ConnectedCalendars nextStep={() => goToIndex(1)} />}
+
+                {currentStep === "setup-availability" && (
+                  <SetupAvailability
+                    nextStep={() => goToIndex(2)}
+                    defaultScheduleId={user.defaultScheduleId}
+                    isFinalStep={true}
+                  />
                 )}
-                {currentStep === "user-profile" && <UserProfile />}
               </Suspense>
             </StepCard>
+
+            {headers[currentStepIndex]?.skipText && (
+              <div className="flex w-full flex-row justify-center">
+                <Button
+                  color="minimal"
+                  data-testid="skip-step"
+                  onClick={(event) => {
+                    event.preventDefault();
+                    goToIndex(currentStepIndex + 1);
+                  }}
+                  className="mt-8 cursor-pointer px-4 py-2 font-sans text-sm font-medium">
+                  {headers[currentStepIndex]?.skipText}
+                </Button>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -133,7 +143,7 @@ export const getServerSideProps = async (context: GetServerSidePropsContext) => 
   const session = await getServerSession({ req, res });
 
   if (!session?.user?.id) {
-    return { redirect: { permanent: false, destination: "/auth/login" } };
+    return { redirect: { permanent: false, destination: "/auth/login?callbackUrl=/expert-setup" } };
   }
 
   const ssr = await ssrInit(context);
@@ -144,41 +154,21 @@ export const getServerSideProps = async (context: GetServerSidePropsContext) => 
     where: {
       id: session.user.id,
     },
-    select: {
-      completedOnboarding: true,
-      teams: {
-        select: {
-          accepted: true,
-          team: {
-            select: {
-              id: true,
-              name: true,
-              logo: true,
-            },
-          },
-        },
-      },
-    },
   });
 
   if (!user) {
     throw new Error("User from session not found");
   }
 
-  if (user.completedOnboarding) {
-    return { redirect: { permanent: false, destination: "/event-types" } };
-  }
-
   return {
     props: {
       ...(await serverSideTranslations(context.locale ?? "", ["common"])),
       trpcState: ssr.dehydrate(),
-      hasPendingInvites: user.teams.find((team) => team.accepted === false) ?? false,
     },
   };
 };
 
-OnboardingPage.isThemeSupported = false;
-OnboardingPage.PageWrapper = PageWrapper;
+ExpertSetupPage.isThemeSupported = false;
+ExpertSetupPage.PageWrapper = PageWrapper;
 
-export default OnboardingPage;
+export default ExpertSetupPage;

@@ -91,13 +91,12 @@ export default function Signup({ prepopulateFormValues, token, orgSlug, orgAutoA
       .then(handleErrors)
       .then(async () => {
         telemetry.event(telemetryEventTypes.signup, collectPageParameters());
-        const verifyOrGettingStarted = flags["email-verification"] ? "auth/verify-email" : "getting-started";
         const callBackUrl = `${
           searchParams?.get("callbackUrl")
             ? isOrgInviteByLink
               ? `${WEBAPP_URL}/${searchParams.get("callbackUrl")}`
               : addOrUpdateQueryParam(`${WEBAPP_URL}/${searchParams.get("callbackUrl")}`, "from", "signup")
-            : `${WEBAPP_URL}/${verifyOrGettingStarted}?from=signup`
+            : `${WEBAPP_URL}/getting-started?from=signup`
         }`;
 
         await signIn<"credentials">("credentials", {

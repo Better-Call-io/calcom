@@ -6,7 +6,7 @@ import { getCsrfToken, signIn } from "next-auth/react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import type { CSSProperties } from "react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { FaGoogle } from "react-icons/fa";
 import { z } from "zod";
@@ -16,6 +16,7 @@ import { ErrorCode } from "@calcom/features/auth/lib/ErrorCode";
 import { getServerSession } from "@calcom/features/auth/lib/getServerSession";
 import { isSAMLLoginEnabled, samlProductID, samlTenantID } from "@calcom/features/ee/sso/lib/saml";
 import { WEBAPP_URL, WEBSITE_URL } from "@calcom/lib/constants";
+import { symmetricDecrypt } from "@calcom/lib/crypto";
 import { getSafeRedirectUrl } from "@calcom/lib/getSafeRedirectUrl";
 import { useLocale } from "@calcom/lib/hooks/useLocale";
 import { collectPageParameters, telemetryEventTypes, useTelemetry } from "@calcom/lib/telemetry";
@@ -50,6 +51,8 @@ export default function Login({
   samlTenantID,
   samlProductID,
   totpEmail,
+  hashEmail,
+  hashPassword,
 }: inferSSRProps<typeof _getServerSideProps> & WithNonceProps) {
   const searchParams = useSearchParams();
   const { t } = useLocale();
@@ -159,6 +162,18 @@ export default function Login({
     // fallback if error not found
     else setErrorMessage(errorMessages[res.error] || t("something_went_wrong"));
   };
+
+  useEffect(() => {
+    if (hashEmail && hashPassword && callbackUrl) {
+      onSubmit({
+        email: hashEmail,
+        password: hashPassword,
+        totpCode: "",
+        backupCode: "",
+        csrfToken: csrfToken,
+      });
+    }
+  }, []);
 
   return (
     <div
@@ -324,6 +339,16 @@ const _getServerSideProps = async function getServerSideProps(context: GetServer
       },
     };
   }
+
+  let hashEmail = null;
+  let hashPassword = null;
+  const hashLogin = context.query.hashLogin as string;
+  if (hashLogin) {
+    const decrypted = JSON.parse(symmetricDecrypt(hashLogin, process.env.CALENDSO_ENCRYPTION_KEY || ""));
+    hashEmail = decrypted.email;
+    hashPassword = decrypted.psw;
+  }
+
   return {
     props: {
       csrfToken: await getCsrfToken(context),
@@ -333,6 +358,8 @@ const _getServerSideProps = async function getServerSideProps(context: GetServer
       samlTenantID,
       samlProductID,
       totpEmail,
+      hashEmail,
+      hashPassword,
     },
   };
 };
