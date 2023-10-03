@@ -5,6 +5,7 @@ import { checkPremiumUsername } from "@calcom/ee/common/lib/checkPremiumUsername
 import { hashPassword } from "@calcom/features/auth/lib/hashPassword";
 import { sendEmailVerification } from "@calcom/features/auth/lib/verifyEmail";
 import { IS_CALCOM } from "@calcom/lib/constants";
+import { symmetricEncrypt } from "@calcom/lib/crypto";
 import slugify from "@calcom/lib/slugify";
 import { closeComUpsertTeamUser } from "@calcom/lib/sync/SyncServiceManager";
 import { validateUsernameInTeam, validateUsername } from "@calcom/lib/validateUsername";
@@ -69,6 +70,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   const hashedPassword = await hashPassword(password);
+
+  const loginHash = symmetricEncrypt(
+    JSON.stringify({ email: userEmail, psw: password }),
+    process.env.CALENDSO_ENCRYPTION_KEY
+  );
 
   if (foundToken && foundToken?.teamId) {
     const team = await prisma.team.findUnique({
@@ -191,6 +197,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       update: {
         username,
         password: hashedPassword,
+        loginHash,
         emailVerified: new Date(Date.now()),
         identityProvider: IdentityProvider.CAL,
       },
@@ -198,6 +205,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         username,
         email: userEmail,
         password: hashedPassword,
+        loginHash,
         identityProvider: IdentityProvider.CAL,
       },
     });
