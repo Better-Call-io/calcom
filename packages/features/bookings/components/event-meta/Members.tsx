@@ -71,7 +71,7 @@ export const EventMembers = ({ schedulingType, users, profile, entity }: EventMe
 
   return (
     <>
-      <AvatarGroup size="sm" className="border-muted" items={uniqueAvatars} />
+      <AvatarGroup size="lg" className="border-muted" items={uniqueAvatars} />
       <p className="text-subtle text-sm font-semibold">
         {showOnlyProfileName
           ? profile.name
