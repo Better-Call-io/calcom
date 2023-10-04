@@ -10,6 +10,7 @@ import { getServerSession } from "@calcom/feature-auth/lib/getServerSession";
 import { APP_NAME } from "@calcom/lib/constants";
 import { useLocale } from "@calcom/lib/hooks/useLocale";
 import { useParamsWithFallback } from "@calcom/lib/hooks/useParamsWithFallback";
+import prisma from "@calcom/prisma";
 import { trpc } from "@calcom/trpc";
 import { Button, StepCard, Steps } from "@calcom/ui";
 import { Loader } from "@calcom/ui/components/icon";
