@@ -19,6 +19,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           },
         ],
         mode: "payment",
+        invoice_creation: { enabled: true },
         metadata: { bookingUid },
         success_url: `${req.headers.origin}/booking/${bookingUid}`,
         cancel_url: req.body.cancelUrl || req.headers.origin,
