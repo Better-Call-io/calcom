@@ -58,7 +58,7 @@ const SetupAvailability = (props: ISetupAvailabilityProps) => {
   const createSchedule = trpc.viewer.availability.schedule.create.useMutation(mutationOptions);
   const updateSchedule = trpc.viewer.availability.schedule.update.useMutation(mutationOptions);
   return (
-    !queryAvailability.isLoading && (
+    !(queryAvailability.isLoading && defaultScheduleId) && (
       <Form
         className="bg-default dark:text-inverted text-emphasis w-full [--cal-brand-accent:#fafafa] dark:bg-opacity-5"
         form={availabilityForm}
