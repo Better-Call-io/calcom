@@ -58,43 +58,45 @@ const SetupAvailability = (props: ISetupAvailabilityProps) => {
   const createSchedule = trpc.viewer.availability.schedule.create.useMutation(mutationOptions);
   const updateSchedule = trpc.viewer.availability.schedule.update.useMutation(mutationOptions);
   return (
-    <Form
-      className="bg-default dark:text-inverted text-emphasis w-full [--cal-brand-accent:#fafafa] dark:bg-opacity-5"
-      form={availabilityForm}
-      handleSubmit={async (values) => {
-        try {
-          if (defaultScheduleId) {
-            await updateSchedule.mutate({
-              scheduleId: defaultScheduleId,
-              name: t("default_schedule_name"),
-              ...values,
-            });
-          } else {
-            await createSchedule.mutate({
-              name: t("default_schedule_name"),
-              ...values,
-            });
+    !queryAvailability.isLoading && (
+      <Form
+        className="bg-default dark:text-inverted text-emphasis w-full [--cal-brand-accent:#fafafa] dark:bg-opacity-5"
+        form={availabilityForm}
+        handleSubmit={async (values) => {
+          try {
+            if (defaultScheduleId) {
+              await updateSchedule.mutate({
+                scheduleId: defaultScheduleId,
+                name: t("default_schedule_name"),
+                ...values,
+              });
+            } else {
+              await createSchedule.mutate({
+                name: t("default_schedule_name"),
+                ...values,
+              });
+            }
+          } catch (error) {
+            if (error instanceof Error) {
+              // setError(error);
+              // @TODO: log error
+            }
           }
-        } catch (error) {
-          if (error instanceof Error) {
-            // setError(error);
-            // @TODO: log error
-          }
-        }
-      }}>
-      <Schedule control={availabilityForm.control} name="schedule" weekStart={1} />
+        }}>
+        <Schedule control={availabilityForm.control} name="schedule" weekStart={1} />
 
-      <div>
-        <Button
-          data-testid="save-availability"
-          type="submit"
-          className="mt-2 w-full justify-center p-2 text-sm sm:mt-8"
-          disabled={availabilityForm.formState.isSubmitting}>
-          {isFinalStep ? t("finish") : t("next_step_text")}{" "}
-          <ArrowRight className="ml-2 h-4 w-4 self-center" />
-        </Button>
-      </div>
-    </Form>
+        <div>
+          <Button
+            data-testid="save-availability"
+            type="submit"
+            className="mt-2 w-full justify-center p-2 text-sm sm:mt-8"
+            disabled={availabilityForm.formState.isSubmitting}>
+            {isFinalStep ? t("finish") : t("next_step_text")}{" "}
+            <ArrowRight className="ml-2 h-4 w-4 self-center" />
+          </Button>
+        </div>
+      </Form>
+    )
   );
 };
 

@@ -176,106 +176,119 @@ export default function Login({
   }, []);
 
   return (
-    <div
-      style={
-        {
-          "--cal-brand": "#111827",
-          "--cal-brand-emphasis": "#101010",
-          "--cal-brand-text": "white",
-          "--cal-brand-subtle": "#9CA3AF",
-        } as CSSProperties
-      }>
-      <AuthContainer
-        title={t("login")}
-        description={t("login")}
-        showLogo
-        heading={twoFactorRequired ? t("2fa_code") : t("welcome_back")}
-        footerText={
-          twoFactorRequired
-            ? !totpEmail
-              ? TwoFactorFooter
-              : ExternalTotpFooter
-            : process.env.NEXT_PUBLIC_DISABLE_SIGNUP !== "true"
-            ? LoginFooter
-            : null
+    !(hashEmail && hashPassword && callbackUrl) && (
+      <div
+        style={
+          {
+            "--cal-brand": "#111827",
+            "--cal-brand-emphasis": "#101010",
+            "--cal-brand-text": "white",
+            "--cal-brand-subtle": "#9CA3AF",
+          } as CSSProperties
         }>
-        <FormProvider {...methods}>
-          <form onSubmit={methods.handleSubmit(onSubmit)} noValidate data-testid="login-form">
-            <div>
-              <input defaultValue={csrfToken || undefined} type="hidden" hidden {...register("csrfToken")} />
-            </div>
-            <div className="space-y-6">
-              <div className={classNames("space-y-6", { hidden: twoFactorRequired })}>
-                <EmailField
-                  id="email"
-                  label={t("email_address")}
-                  defaultValue={totpEmail || (searchParams?.get("email") as string)}
-                  placeholder="john.doe@example.com"
-                  required
-                  {...register("email")}
+        <AuthContainer
+          title={t("login")}
+          description={t("login")}
+          showLogo
+          heading={twoFactorRequired ? t("2fa_code") : t("welcome_back")}
+          footerText={
+            twoFactorRequired
+              ? !totpEmail
+                ? TwoFactorFooter
+                : ExternalTotpFooter
+              : process.env.NEXT_PUBLIC_DISABLE_SIGNUP !== "true"
+              ? LoginFooter
+              : null
+          }>
+          <FormProvider {...methods}>
+            <form onSubmit={methods.handleSubmit(onSubmit)} noValidate data-testid="login-form">
+              <div>
+                <input
+                  defaultValue={csrfToken || undefined}
+                  type="hidden"
+                  hidden
+                  {...register("csrfToken")}
                 />
-                <div className="relative">
-                  <PasswordField
-                    id="password"
-                    autoComplete="off"
-                    required={!totpEmail}
-                    className="mb-0"
-                    {...register("password")}
+              </div>
+              <div className="space-y-6">
+                <div className={classNames("space-y-6", { hidden: twoFactorRequired })}>
+                  <EmailField
+                    id="email"
+                    label={t("email_address")}
+                    defaultValue={totpEmail || (searchParams?.get("email") as string)}
+                    placeholder="john.doe@example.com"
+                    required
+                    {...register("email")}
                   />
-                  <div className="absolute -top-[2px] ltr:right-0 rtl:left-0">
-                    <Link
-                      href="/auth/forgot-password"
-                      tabIndex={-1}
-                      className="text-default text-sm font-medium">
-                      {t("forgot")}
-                    </Link>
+                  <div className="relative">
+                    <PasswordField
+                      id="password"
+                      autoComplete="off"
+                      required={!totpEmail}
+                      className="mb-0"
+                      {...register("password")}
+                    />
+                    <div className="absolute -top-[2px] ltr:right-0 rtl:left-0">
+                      <Link
+                        href="/auth/forgot-password"
+                        tabIndex={-1}
+                        className="text-default text-sm font-medium">
+                        {t("forgot")}
+                      </Link>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              {twoFactorRequired ? !twoFactorLostAccess ? <TwoFactor center /> : <BackupCode center /> : null}
+                {twoFactorRequired ? (
+                  !twoFactorLostAccess ? (
+                    <TwoFactor center />
+                  ) : (
+                    <BackupCode center />
+                  )
+                ) : null}
 
-              {errorMessage && <Alert severity="error" title={errorMessage} />}
-              <Button
-                type="submit"
-                color="primary"
-                disabled={formState.isSubmitting}
-                className="w-full justify-center">
-                {twoFactorRequired ? t("submit") : t("sign_in")}
-              </Button>
-            </div>
-          </form>
-          {!twoFactorRequired && (
-            <>
-              {(isGoogleLoginEnabled || isSAMLLoginEnabled) && <hr className="border-subtle my-8" />}
-              <div className="space-y-3">
-                {isGoogleLoginEnabled && (
-                  <Button
-                    color="secondary"
-                    className="w-full justify-center"
-                    data-testid="google"
-                    StartIcon={FaGoogle}
-                    onClick={async (e) => {
-                      e.preventDefault();
-                      await signIn("google");
-                    }}>
-                    {t("signin_with_google")}
-                  </Button>
-                )}
-                {isSAMLLoginEnabled && (
-                  <SAMLLogin
-                    samlTenantID={samlTenantID}
-                    samlProductID={samlProductID}
-                    setErrorMessage={setErrorMessage}
-                  />
-                )}
+                {errorMessage && <Alert severity="error" title={errorMessage} />}
+                <Button
+                  type="submit"
+                  color="primary"
+                  disabled={formState.isSubmitting}
+                  className="w-full justify-center">
+                  {twoFactorRequired ? t("submit") : t("sign_in")}
+                </Button>
               </div>
-            </>
-          )}
-        </FormProvider>
-      </AuthContainer>
-      <AddToHomescreen />
-    </div>
+            </form>
+            {!twoFactorRequired && (
+              <>
+                {(isGoogleLoginEnabled || isSAMLLoginEnabled) && <hr className="border-subtle my-8" />}
+                <div className="space-y-3">
+                  {isGoogleLoginEnabled && (
+                    <Button
+                      color="secondary"
+                      className="w-full justify-center"
+                      data-testid="google"
+                      StartIcon={FaGoogle}
+                      onClick={async (e) => {
+                        e.preventDefault();
+                        await signIn("google");
+                      }}>
+                      {t("signin_with_google")}
+                    </Button>
+                  )}
+                  {isSAMLLoginEnabled && (
+                    <SAMLLogin
+                      samlTenantID={samlTenantID}
+                      samlProductID={samlProductID}
+                      setErrorMessage={setErrorMessage}
+                    />
+                  )}
+                </div>
+              </>
+            )}
+          </FormProvider>
+        </AuthContainer>
+        <AddToHomescreen />
+      </div>
+    )
   );
 }
 
@@ -323,7 +336,7 @@ const _getServerSideProps = async function getServerSideProps(context: GetServer
   if (session) {
     return {
       redirect: {
-        destination: "/",
+        destination: context.query.callbackUrl ? `/${context.query.callbackUrl}` : "/",
         permanent: false,
       },
     };
