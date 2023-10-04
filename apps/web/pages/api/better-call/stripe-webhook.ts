@@ -13,6 +13,7 @@ import { getTranslation } from "@calcom/lib/server";
 import { getTimeFormatStringFromUserTimeFormat } from "@calcom/lib/timeFormat";
 import prisma from "@calcom/prisma";
 import { BookingStatus } from "@calcom/prisma/enums";
+import { credentialForCalendarServiceSelect } from "@calcom/prisma/selects/credential";
 import stripe from "@calcom/stripepayment/lib/server";
 import type { CalendarEvent } from "@calcom/types/Calendar";
 
@@ -71,7 +72,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             select: {
               id: true,
               username: true,
-              credentials: true,
+              credentials: { select: credentialForCalendarServiceSelect },
               timeZone: true,
               timeFormat: true,
               email: true,
@@ -83,7 +84,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         },
       });
       if (!booking) throw new HttpCode({ statusCode: 204, message: "No booking found" });
-      if (!booking.user) throw new HttpCode({ statusCode: 204, message: "No user found" });
+      const { user: userWithCredentials } = booking;
+      if (!userWithCredentials) throw new HttpCode({ statusCode: 204, message: "No user found" });
+      const { credentials, ...user } = userWithCredentials;
+      const t = await getTranslation(user.locale ?? "en", "common");
       const attendeesListPromises = booking.attendees.map(async (attendee) => {
         return {
           name: attendee.name,
@@ -97,8 +101,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
 
       const attendeesList = await Promise.all(attendeesListPromises);
-      const selectedDestinationCalendar = booking.destinationCalendar || booking.user.destinationCalendar;
-      const t = await getTranslation(booking.user.locale ?? "en", "common");
+      const selectedDestinationCalendar = booking.destinationCalendar || user.destinationCalendar;
       const evt: CalendarEvent = {
         type: booking.title,
         title: booking.title,
@@ -111,11 +114,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           bookingFields: booking.eventType?.bookingFields || null,
         }),
         organizer: {
-          email: booking.user.email,
-          name: booking.user.name!,
-          timeZone: booking.user.timeZone,
-          timeFormat: getTimeFormatStringFromUserTimeFormat(booking.user.timeFormat),
-          language: { translate: t, locale: booking.user.locale ?? "en" },
+          email: user.email,
+          name: user.name!,
+          timeZone: user.timeZone,
+          timeFormat: getTimeFormatStringFromUserTimeFormat(user.timeFormat),
+          language: { translate: t, locale: user.locale ?? "en" },
         },
         attendees: attendeesList,
         location: booking.location,
@@ -127,12 +130,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         paid: true,
         status: BookingStatus.ACCEPTED,
       };
-      const isConfirmed = booking.status === BookingStatus.ACCEPTED;
-      if (isConfirmed) {
-        const eventManager = new EventManager(booking.user);
-        const scheduleResult = await eventManager.create(evt);
-        bookingData.references = { create: scheduleResult.referencesToCreate };
-      }
+      const eventManager = new EventManager(userWithCredentials);
+      const scheduleResult = await eventManager.create(evt);
+      bookingData.references = { create: scheduleResult.referencesToCreate };
 
       const bookingUpdate = prisma.booking.update({
         where: {
