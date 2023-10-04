@@ -180,10 +180,26 @@ export const BookEventFormChild = ({
   });
   const createBookingMutation = useMutation(createBooking, {
     onSuccess: async (responseData) => {
-      const { uid } = responseData;
+      const { uid, paymentRequired } = responseData;
       if (!uid) {
         console.error("No uid returned from createBookingMutation");
         return;
+      }
+      if (!paymentRequired) {
+        const query = {
+          isSuccessBookingPage: true,
+          email: bookingForm.getValues("responses.email"),
+          eventTypeSlug: eventSlug,
+          seatReferenceUid: "seatReferenceUid" in responseData ? responseData.seatReferenceUid : null,
+          formerTime:
+            isRescheduling && bookingData?.startTime ? dayjs(bookingData.startTime).toString() : undefined,
+        };
+
+        return bookingSuccessRedirect({
+          successRedirectUrl: eventType?.successRedirectUrl || "",
+          query,
+          booking: responseData,
+        });
       }
       const response = await fetch("/api/better-call/checkout", {
         method: "POST",

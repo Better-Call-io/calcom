@@ -1190,11 +1190,7 @@ async function handler(
     const dynamicEventSlugRef = !eventTypeId ? eventTypeSlug : null;
     const dynamicGroupSlugRef = !eventTypeId ? (reqBody.user as string).toLowerCase() : null;
 
-    // If the user is not the owner of the event, new booking should be always pending.
-    // Otherwise, an owner rescheduling should be always accepted.
-    // Before comparing make sure that userId is set, otherwise undefined === undefined
-    const userReschedulingIsOwner = userId && originalRescheduledBooking?.user?.id === userId;
-    const isConfirmedByDefault = false;
+    const isConfirmedByDefault = !!originalRescheduledBooking;
 
     const attendeesData = evt.attendees.map((attendee) => {
       //if attendee is team member, it should fetch their locale not booker's locale
@@ -1482,7 +1478,7 @@ async function handler(
   }
 
   req.statusCode = 201;
-  return { ...booking, message: "Payment required" };
+  return { ...booking, paymentRequired: !rescheduleUid };
 }
 
 export default handler;
