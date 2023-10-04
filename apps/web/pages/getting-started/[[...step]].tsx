@@ -11,7 +11,6 @@ import { APP_NAME } from "@calcom/lib/constants";
 import { useLocale } from "@calcom/lib/hooks/useLocale";
 import { useParamsWithFallback } from "@calcom/lib/hooks/useParamsWithFallback";
 import prisma from "@calcom/prisma";
-import { trpc } from "@calcom/trpc";
 import { StepCard, Steps } from "@calcom/ui";
 import { Loader } from "@calcom/ui/components/icon";
 
@@ -42,7 +41,6 @@ const OnboardingPage = () => {
   const pathname = usePathname();
   const params = useParamsWithFallback();
   const router = useRouter();
-  const [user] = trpc.viewer.me.useSuspenseQuery();
   const { t } = useLocale();
   const result = stepRouteSchema.safeParse(params);
   const currentStep = result.success ? result.data.step[0] : INITIAL_STEP;
