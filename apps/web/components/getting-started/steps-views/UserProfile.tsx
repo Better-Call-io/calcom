@@ -82,7 +82,7 @@ const UserProfile = () => {
       title: "Better call",
       slug: "better-call",
       length: 30,
-      description: "Politique de remboursement : TO FILL",
+      description: t("the_meeting_is_divided_in_two_parts"),
     },
   ];
 
