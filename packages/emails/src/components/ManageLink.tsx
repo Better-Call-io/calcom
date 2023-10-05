@@ -1,4 +1,4 @@
-import { getCancelLink, getRescheduleLink } from "@calcom/lib/CalEventParser";
+import { getRescheduleLink } from "@calcom/lib/CalEventParser";
 import type { CalendarEvent, Person } from "@calcom/types/Calendar";
 
 export function ManageLink(props: { calEvent: CalendarEvent; attendee: Person }) {
@@ -40,20 +40,8 @@ export function ManageLink(props: { calEvent: CalendarEvent; attendee: Person })
                 }}>
                 <>{t("reschedule")}</>
               </a>
-              <>{t("or_lowercase")}</>
             </span>
           )}
-          <span>
-            <a
-              href={getCancelLink(props.calEvent)}
-              style={{
-                color: "#374151",
-                marginLeft: "5px",
-                textDecoration: "underline",
-              }}>
-              <>{t("cancel")}</>
-            </a>
-          </span>
         </p>
       </div>
     );

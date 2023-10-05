@@ -547,19 +547,8 @@ export default function Success(props: SuccessProps) {
                                 {t("reschedule")}
                               </Link>
                             </span>
-                            <span className="mx-2">{t("or_lowercase")}</span>
                           </span>
                         )}
-
-                        <button
-                          data-testid="cancel"
-                          className={classNames(
-                            "text-default underline",
-                            props.recurringBookings && "ltr:mr-2 rtl:ml-2"
-                          )}
-                          onClick={() => setIsCancellationMode(true)}>
-                          {t("cancel")}
-                        </button>
                       </div>
                     </>
                   ) : (
