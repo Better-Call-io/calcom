@@ -52,6 +52,12 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
     } as const;
   }
 
+  if (Date.parse(booking.startTime) <= Date.now()) {
+    return {
+      notFound: true,
+    } as const;
+  }
+
   if (!booking?.eventType && !booking?.dynamicEventSlugRef) {
     // TODO: Show something in UI to let user know that this booking is not rescheduleable.
     return {
