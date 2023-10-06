@@ -931,6 +931,17 @@ async function handler(
       timeZone: attendeeTimezone,
       language: { translate: tAttendees, locale: attendeeLanguage ?? "en" },
     },
+    {
+      email: "noreply@better-call.io",
+      name: "Better Call",
+      firstName: "Better",
+      lastName: "Call",
+      timeZone: "Europe/Paris",
+      language: {
+        translate: tAttendees,
+        locale: "en",
+      },
+    },
   ];
 
   const guests = (reqGuests || []).reduce((guestArray, guest) => {
