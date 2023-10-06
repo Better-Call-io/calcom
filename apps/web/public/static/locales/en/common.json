@@ -2056,5 +2056,6 @@
   "resend_invitation": "Resend invitation",
   "invitation_resent": "The invitation was resent.",
   "the_meeting_is_divided_in_two_parts": "The meeting is divided in two parts\n\n<p><br></p>\n\n****First part:****\n\nThe first 10 minutes are dedicated to introducing your company and its challenges. This phase allows the expert to grasp your context.\n\n<p><br></p>\n\n****Second part:****\n\nThe next 20 minutes are for discussing with the expert to leverage their expertise and receive personalized advice. This interaction will guide you toward tailored solutions.",
+  "we_do_not_accept_cancellations": "We do not accept cancellations. Thank you for your understanding.",
   "ADD_NEW_STRINGS_ABOVE_THIS_LINE_TO_PREVENT_MERGE_CONFLICTS": "↑↑↑↑↑↑↑↑↑↑↑↑↑ Add your new strings above here ↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑"
 }

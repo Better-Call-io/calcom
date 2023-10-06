@@ -154,9 +154,12 @@ export const EventDetails = ({ product, event, blocks = defaultEventDetailsBlock
             if (product.price <= 0) return null;
 
             return (
-              <EventMetaBlock key={block} icon={CreditCard}>
-                <EventPrice product={product} />
-              </EventMetaBlock>
+              <>
+                <EventMetaBlock key={block} icon={CreditCard}>
+                  <EventPrice product={product} />
+                </EventMetaBlock>
+                <div className="text-xs">{t("we_do_not_accept_cancellations")}</div>
+              </>
             );
         }
       })}

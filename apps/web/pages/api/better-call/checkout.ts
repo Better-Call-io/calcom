@@ -1,6 +1,9 @@
 import type { NextApiRequest, NextApiResponse } from "next";
+import englishTranslations from "public/static/locales/en/common.json";
+import frenchTranslations from "public/static/locales/fr/common.json";
 
 import stripe from "@calcom/app-store/stripepayment/lib/server";
+import { getLocaleFromRequest } from "@calcom/lib/getLocaleFromRequest";
 import getProduct from "@calcom/stripepayment/lib/getProduct";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -10,6 +13,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const {
         default_price: { id },
       } = await getProduct(req.body.bookedUserId);
+      const locale = await getLocaleFromRequest(req);
       const session = await stripe.checkout.sessions.create({
         customer_email: req.body.customerEmail,
         line_items: [
@@ -23,6 +27,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         metadata: { bookingUid },
         success_url: `${req.headers.origin}/booking/${bookingUid}`,
         cancel_url: req.body.cancelUrl || req.headers.origin,
+        custom_text: {
+          submit: {
+            message:
+              locale === "fr"
+                ? frenchTranslations["we_do_not_accept_cancellations"]
+                : englishTranslations["we_do_not_accept_cancellations"],
+          },
+        },
       });
       res.status(200).json({ url: session.url });
     } catch (err: any) {

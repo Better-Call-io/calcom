@@ -2051,5 +2051,6 @@
   "event_setup_length_error": "Configuration de l'événement : la durée doit être d'au moins 1 minute.",
   "availability_schedules": "Horaires de disponibilité",
   "the_meeting_is_divided_in_two_parts": "L'échange est divisé en deux parties\n\n<p><br></p>\n\n****Première partie:****\n\nLes dix premières minutes sont consacrées à la présentation de votre entreprise et de ses défis. Cette phase permet à l'expert de comprendre votre contexte.\n\n<p><br></p>\n\n****Deuxième partie:****\n\nLes 20 minutes suivantes sont réservées à la discussion avec l'expert afin de bénéficier de son expertise et recevoir des conseils personnalisés. Cette interaction vous orientera vers des solutions sur mesure.",
+  "we_do_not_accept_cancellations": "Nous n'acceptons pas les annulations. Merci pour votre compréhension.",
   "ADD_NEW_STRINGS_ABOVE_THIS_LINE_TO_PREVENT_MERGE_CONFLICTS": "↑↑↑↑↑↑↑↑↑↑↑↑↑ Ajoutez vos nouvelles chaînes ci-dessus ↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑"
 }
