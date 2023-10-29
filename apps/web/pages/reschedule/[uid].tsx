@@ -51,8 +51,8 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
       notFound: true,
     } as const;
   }
-
-  if (Date.parse(booking.startTime) <= Date.now()) {
+  // Disable reschedule 2 days before the booking startTime
+  if (Date.parse(booking.startTime) <= Date.now() + 2 * 24 * 60 * 60 * 1000) {
     return {
       notFound: true,
     } as const;

@@ -52,7 +52,7 @@ ${calEvent.organizer.email}
   const teamMembers = calEvent.team?.members
     ? calEvent.team.members.map((member) => {
         return `
-${member.name} - ${t("team_member")} 
+${member.name} - ${t("team_member")}
 ${member.email}
     `;
       })
@@ -155,10 +155,7 @@ const getSeatReferenceId = (calEvent: CalendarEvent): string => {
 };
 
 export const getManageLink = (calEvent: CalendarEvent, t: TFunction) => {
-  return `
-${t("need_to_reschedule_or_cancel")}
-${(calEvent.bookerUrl ?? WEBAPP_URL) + "/booking/" + getUid(calEvent) + "?changes=true"}
-  `;
+  return `${t("need_to_make_a_change")} ${getRescheduleLink(calEvent)}`;
 };
 
 export const getCancelLink = (calEvent: CalendarEvent): string => {
