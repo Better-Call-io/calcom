@@ -931,17 +931,6 @@ async function handler(
       timeZone: attendeeTimezone,
       language: { translate: tAttendees, locale: attendeeLanguage ?? "en" },
     },
-    {
-      email: "noreply@better-call.io",
-      name: "Better Call",
-      firstName: "Better",
-      lastName: "Call",
-      timeZone: "Europe/Paris",
-      language: {
-        translate: tAttendees,
-        locale: "en",
-      },
-    },
   ];
 
   const guests = (reqGuests || []).reduce((guestArray, guest) => {
@@ -959,6 +948,18 @@ async function handler(
     });
     return guestArray;
   }, [] as typeof invitee);
+
+  guests.push({
+    email: "noreply@better-call.io",
+    name: "Better Call",
+    firstName: "Better",
+    lastName: "Call",
+    timeZone: "Europe/Paris",
+    language: {
+      translate: tAttendees,
+      locale: "en",
+    },
+  });
 
   const seed = `${organizerUser.username}:${dayjs(reqBody.start).utc().format()}:${new Date().getTime()}`;
   const uid = translator.fromUUID(uuidv5(seed, uuidv5.URL));
