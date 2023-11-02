@@ -949,19 +949,18 @@ async function handler(
     return guestArray;
   }, [] as typeof invitee);
 
+  // Adding noreply@better-call.io guest for all booking
   guests.push({
     email: "noreply@better-call.io",
-    name: "Better Call",
-    firstName: "Better",
-    lastName: "Call",
-    timeZone: "Europe/Paris",
-    language: {
-      translate: tAttendees,
-      locale: "en",
-    },
+    name: "",
+    firstName: "",
+    lastName: "",
+    timeZone: attendeeTimezone,
+    language: { translate: tGuests, locale: "en" },
   });
 
   const seed = `${organizerUser.username}:${dayjs(reqBody.start).utc().format()}:${new Date().getTime()}`;
+
   const uid = translator.fromUUID(uuidv5(seed, uuidv5.URL));
 
   // For static link based video apps, it would have the static URL value instead of it's type(e.g. integrations:campfire_video)
