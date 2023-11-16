@@ -210,7 +210,6 @@ export const BookEventFormChild = ({
           customerEmail: responseData.responses.email,
           bookedUserId: responseData.userId,
           bookingUid: uid,
-          cancelUrl: window.location.href, // To be updated with the webflow expert page url
         }),
       });
       if (response.status === 200) {
