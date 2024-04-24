@@ -26,6 +26,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         invoice_creation: { enabled: true },
         metadata: { bookingUid },
         success_url: `${req.headers.origin}/booking/${bookingUid}`,
+        automatic_tax: { enabled: true },
         custom_text: {
           submit: {
             message:
